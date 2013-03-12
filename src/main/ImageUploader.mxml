@@ -37,6 +37,8 @@
 
         public var userUploadImageHandler:String;
 
+        public var errorHandler:String;
+
         private var _fileReference:FileReference;
 
         private var _loader:Loader;
@@ -91,7 +93,16 @@
 
         private function onClick(event:MouseEvent):void {
             _fileReference = new FileReference();
-            _fileReference.browse(types);
+
+            try {
+                _fileReference.browse(types);
+            } catch (e:Error) {
+                ExternalInterface.call(errorHandler, {
+                    errorID: e.errorID,
+                    text: e.message
+                })
+            }
+
             startListenFileReference();
         }
 
@@ -140,9 +151,16 @@
         private function onComplete(event:Event):void {
             stopListenFileReference();
 
-            _loader = new Loader();
-            startListenLoader(_loader.contentLoaderInfo);
-            _loader.loadBytes(_fileReference.data);
+            try {
+                _loader = new Loader();
+                startListenLoader(_loader.contentLoaderInfo);
+                _loader.loadBytes(_fileReference.data);
+            } catch (e:Error) {
+                ExternalInterface.call(errorHandler, {
+                    errorID: e.errorID,
+                    text: e.message
+                });
+            }
         }
 
         private function startListenLoader(loaderInfo:LoaderInfo):void {

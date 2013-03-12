@@ -72,22 +72,32 @@ package org.hyzhak.imageuploader {
             template = template.replace(ID_MARK, id);
             template = template.replace(ID_DATA, _encoder.toString());
 
-            var request:URLRequest = new URLRequest();
-            request.url = url;
-            request.method = URLRequestMethod.POST;
-            request.data = template;
-            
-            var loader:URLLoader = new URLLoader();
-            loader.dataFormat = URLLoaderDataFormat.TEXT;
-            loader.addEventListener(Event.COMPLETE, onCompleteHandler);
-            loader.addEventListener(Event.OPEN, onOpenHandler);
-            loader.addEventListener(ProgressEvent.PROGRESS, onProgressHandler);
-            loader.addEventListener(ProgressEvent.SOCKET_DATA, onProgressHandler);
-            loader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, onSecurityErrorHandler);
-            loader.addEventListener(HTTPStatusEvent.HTTP_STATUS, onHttpStatusHandler);
-            loader.addEventListener(IOErrorEvent.IO_ERROR, onIOErrorHandler);
-            loader.addEventListener(OutputProgressEvent.OUTPUT_PROGRESS, onOutputProgress);
-            loader.load(request);
+            try {
+
+                var request:URLRequest = new URLRequest();
+                request.url = url;
+                request.method = URLRequestMethod.POST;
+                request.data = template;
+
+                var loader:URLLoader = new URLLoader();
+                loader.dataFormat = URLLoaderDataFormat.TEXT;
+                loader.addEventListener(Event.COMPLETE, onCompleteHandler);
+                loader.addEventListener(Event.OPEN, onOpenHandler);
+                loader.addEventListener(ProgressEvent.PROGRESS, onProgressHandler);
+                loader.addEventListener(ProgressEvent.SOCKET_DATA, onProgressHandler);
+                loader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, onSecurityErrorHandler);
+                loader.addEventListener(HTTPStatusEvent.HTTP_STATUS, onHttpStatusHandler);
+                loader.addEventListener(IOErrorEvent.IO_ERROR, onIOErrorHandler);
+                loader.addEventListener(OutputProgressEvent.OUTPUT_PROGRESS, onOutputProgress);
+                loader.load(request);
+            } catch(e:Error) {
+                setTimeout(function():void {
+                    _deferred.reject({
+                        errorID:e.errorID,
+                        text:e.message
+                    });
+                },0);
+            }
         }
 
         private function onCompleteHandler(event:Event):void {
