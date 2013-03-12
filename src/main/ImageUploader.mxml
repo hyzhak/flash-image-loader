@@ -31,6 +31,8 @@
 
         public var postTemplate:String;
 
+        public var showUploadButton:Boolean = false;
+
         private var _fileReference:FileReference;
 
         private var _loader:Loader;
@@ -205,5 +207,5 @@
             <s:Image visible="{imageData != null}" source="{imageData}" click="onClick(event)" left="0" right="0" top="0" bottom="0"></s:Image>
         </s:Group>
     </s:Group>
-    <s:Button label="upload" click="push()"></s:Button>
+    <s:Button visible="{showUploadButton}" label="upload" click="push()"></s:Button>
 </s:Application>
