@@ -6,7 +6,7 @@
         import org.hyzhak.imageuploader.PostBytesCommand;
 
         [Bindable]
-        public var loading:Boolean = true;
+        public var loading:Boolean = false;
 
         [Bindable]
         public var imageUrl:String = "";
@@ -20,6 +20,9 @@
         [Bindable]
         public var imageData:Bitmap;
 
+        [Bindable]
+        public var useGifForProgressImage:Boolean = false;
+
         public var fetchCompleteHandler:String;
 
         public var pushCompleteHandler:String;
@@ -27,8 +30,6 @@
         public var postUrl:String;
 
         public var postTemplate:String;
-
-        public var useGifForProgressImage:Boolean = false;
 
         private var _fileReference:FileReference;
 
@@ -56,6 +57,9 @@
                 useGifForProgressImage = false;
             } else {
                 useGifForProgressImage = true;
+                setTimeout(function():void {
+                    trace("gifPlayerComponent.visible", gifPlayerComponent.visible);
+                }, 1000);
             }
         }
 
@@ -153,9 +157,9 @@
         private function onCompleteConvertToBitmap(event:Event):void {
             var loaderInfo:LoaderInfo = (event.target as LoaderInfo);
             stopListenLoader(loaderInfo);
-            stopProgressAnimation()
 
             imageData = loaderInfo.content as Bitmap;
+            stopProgressAnimation();
         }
 
         private function startProgressAnimation():void {
@@ -192,8 +196,9 @@
             <s:layout>
                 <s:BasicLayout/>
             </s:layout>
+
             <s:Image visible="{!useGifForProgressImage}" source="{inProgressImageUrl}" left="0" right="0" top="0" bottom="0"/>
-            <imageuploader:GIFPlayerComponent id="gifPlayerComponent" visible="{useGifForProgressImage}" source="{inProgressImageUrl}"/>
+            <imageuploader:GIFPlayerComponent id="gifPlayerComponent" visible="{useGifForProgressImage}" source="{inProgressImageUrl}" horizontalCenter="0" verticalCenter="0"/>
         </s:Group>
         <s:Group visible="{!loading}" left="0" right="0" top="0" bottom="0">
             <s:Image visible="{imageData == null}" source="{imageUrl}" click="onClick(event)" left="0" right="0" top="0" bottom="0"></s:Image>
