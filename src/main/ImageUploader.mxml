@@ -23,15 +23,19 @@
         [Bindable]
         public var useGifForProgressImage:Boolean = false;
 
-        public var fetchCompleteHandler:String;
-
-        public var pushCompleteHandler:String;
+        [Bindable]
+        public var uploadButtonIsVisible:Boolean = false;
 
         public var postUrl:String;
 
         public var postTemplate:String;
 
-        public var showUploadButton:Boolean = false;
+        //Handlers
+        public var fetchCompleteHandler:String;
+
+        public var pushCompleteHandler:String;
+
+        public var userUploadImageHandler:String;
 
         private var _fileReference:FileReference;
 
@@ -59,7 +63,7 @@
                 useGifForProgressImage = false;
             } else {
                 useGifForProgressImage = true;
-                setTimeout(function():void {
+                setTimeout(function ():void {
                     trace("gifPlayerComponent.visible", gifPlayerComponent.visible);
                 }, 1000);
             }
@@ -161,6 +165,14 @@
             stopListenLoader(loaderInfo);
 
             imageData = loaderInfo.content as Bitmap;
+            ExternalInterface.call(userUploadImageHandler, {
+                creationDate: _fileReference.creationDate,
+                creator: _fileReference.creator,
+                modificationDate: _fileReference.modificationDate,
+                size: _fileReference.size,
+                type: _fileReference.type,
+                name: _fileReference.name
+            });
             stopProgressAnimation();
         }
 
@@ -184,14 +196,18 @@
 
         private function onPushOk(value:*):void {
             stopProgressAnimation();
-            ExternalInterface.call('ok');
+            ExternalInterface.call(pushCompleteHandler, {
+                error: 0
+            });
         }
 
-        private function onPushError(value:*):void {
+        private function onPushError(value:Object):void {
             stopProgressAnimation();
-            ExternalInterface.call('error');
+            ExternalInterface.call(pushCompleteHandler, {
+                error: value.errorID,
+                text: value.text
+            });
         }
-
         ]]></fx:Script>
     <s:Group left="0" right="0" top="0" bottom="0">
         <s:Group visible="{loading}" horizontalCenter="0" verticalCenter="0">
@@ -207,5 +223,5 @@
             <s:Image visible="{imageData != null}" source="{imageData}" click="onClick(event)" left="0" right="0" top="0" bottom="0"></s:Image>
         </s:Group>
     </s:Group>
-    <s:Button visible="{showUploadButton}" label="upload" click="push()"></s:Button>
+    <s:Button visible="{uploadButtonIsVisible}" label="upload" click="push()"></s:Button>
 </s:Application>

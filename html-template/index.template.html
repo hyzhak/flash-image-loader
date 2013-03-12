@@ -36,6 +36,18 @@
             
         <script type="text/javascript" src="swfobject.js"></script>
         <script type="text/javascript">
+            var api = {};
+            api.fetchCompleteHandler = function() {
+                console.log('fetchCompleteHandler', arguments);
+            }
+            api.pushCompleteHandler = function() {
+                console.log('pushCompleteHandler', arguments);
+            }
+            api.userUploadImageHandler = function() {
+                console.log('userUploadImageHandler', arguments);
+            }
+        </script>
+        <script type="text/javascript">
             // For version detection, set to min. required Flash Player version, or 0 (or 0.0.0), for no version detection. 
             var swfVersionStr = "${version_major}.${version_minor}.${version_revision}";
             // To use express install, set to playerProductInstall.swf, otherwise the empty string. 
@@ -48,11 +60,14 @@
                 imageUrl: 'http://dl.realaxy.com/3q7tl3dnv0rp16h4l038p9fcov',
                 postUrl: 'http://beta.celebvideomessages.com/api/v1/profile/edit/',
                 postTemplate: '{id : {{id}}, userpic_data : {{userpic_data}} }',
+                uploadButtonIsVisible: true,
                 //
                 //fetch
-                fetchCompleteHandler: 'fetchCompleteHandler',
+                fetchCompleteHandler: 'api.fetchCompleteHandler',
                 //push
-                pushCompleteHandler: 'pushCompleteHandler'
+                pushCompleteHandler: 'api.pushCompleteHandler',
+                //user upload image
+                userUploadImageHandler: 'api.userUploadImageHandler'
             };
 
             var params = {};
