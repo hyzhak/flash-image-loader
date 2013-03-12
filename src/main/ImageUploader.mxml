@@ -1,11 +1,12 @@
 <?xml version="1.0"?>
 <s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+               xmlns:imageuploader="org.hyzhak.imageuploader.*"
                addedToStage="onCreationComplete(event)">
     <fx:Script><![CDATA[
         import org.hyzhak.imageuploader.PostBytesCommand;
 
         [Bindable]
-        public var loading:Boolean = false;
+        public var loading:Boolean = true;
 
         [Bindable]
         public var imageUrl:String = "";
@@ -27,6 +28,8 @@
 
         public var postTemplate:String;
 
+        public var useGifForProgressImage:Boolean = false;
+
         private var _fileReference:FileReference;
 
         private var _loader:Loader;
@@ -38,8 +41,22 @@
 
         private function onCreationComplete(event:Event):void {
             fetchFlashVars();
+            updateUseGifForProgressImage();
+            addEventListener("changeInProgressImageUrl", onChangeInProgressImageUrl);
             ExternalInterface.addCallback("fetch", fetch);
             ExternalInterface.addCallback("push", push);
+        }
+
+        private function onChangeInProgressImageUrl(event:Event):void {
+            updateUseGifForProgressImage();
+        }
+
+        private function updateUseGifForProgressImage():void {
+            if (inProgressImageUrl == null || inProgressImageUrl.toLowerCase().lastIndexOf(".gif") != inProgressImageUrl.length - 4) {
+                useGifForProgressImage = false;
+            } else {
+                useGifForProgressImage = true;
+            }
         }
 
         private function fetch(url:String):void {
@@ -168,9 +185,16 @@
             stopProgressAnimation();
             ExternalInterface.call('error');
         }
+
         ]]></fx:Script>
     <s:Group left="0" right="0" top="0" bottom="0">
-        <s:Image visible="{loading}" source="{inProgressImageUrl}" left="0" right="0" top="0" bottom="0"/>
+        <s:Group visible="{loading}" horizontalCenter="0" verticalCenter="0">
+            <s:layout>
+                <s:BasicLayout/>
+            </s:layout>
+            <s:Image visible="{!useGifForProgressImage}" source="{inProgressImageUrl}" left="0" right="0" top="0" bottom="0"/>
+            <imageuploader:GIFPlayerComponent id="gifPlayerComponent" visible="{useGifForProgressImage}" source="{inProgressImageUrl}"/>
+        </s:Group>
         <s:Group visible="{!loading}" left="0" right="0" top="0" bottom="0">
             <s:Image visible="{imageData == null}" source="{imageUrl}" click="onClick(event)" left="0" right="0" top="0" bottom="0"></s:Image>
             <s:Image visible="{imageData != null}" source="{imageData}" click="onClick(event)" left="0" right="0" top="0" bottom="0"></s:Image>
