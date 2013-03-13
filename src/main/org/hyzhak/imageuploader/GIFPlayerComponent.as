@@ -7,6 +7,8 @@ package org.hyzhak.imageuploader
     import flash.display.Bitmap;
 
     import flash.events.Event;
+    import flash.events.IOErrorEvent;
+    import flash.events.SecurityErrorEvent;
 
     import flash.net.URLLoader;
     import flash.net.URLLoaderDataFormat;
@@ -20,7 +22,7 @@ package org.hyzhak.imageuploader
 		//private var _gif:GIFPlayer = new GIFPlayer();
         private var _gif:GIFPlayer = new GIFPlayer();
 		private var _source:String = new String();
-        private var loader:URLLoader = new URLLoader();
+        private var _loader:URLLoader = new URLLoader();
 
         [Embed(source="inprogress.gif", mimeType="application/octet-stream")]
         public static const IN_PROGRESS_CLASS:Class;
@@ -29,12 +31,13 @@ package org.hyzhak.imageuploader
 		{
 			super();
             addChild(_gif);
-            loader.dataFormat = URLLoaderDataFormat.BINARY;
-            loader.addEventListener(Event.COMPLETE, onComplete);
+            _loader.dataFormat = URLLoaderDataFormat.BINARY;
+            _loader.addEventListener(Event.COMPLETE, onComplete);
+            _loader.addEventListener(IOErrorEvent.IO_ERROR, onIOError);
+            _loader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, onSecurityError);
             _gif.addEventListener(GIFPlayerEvent.COMPLETE, onGifDecodeComplete);
             _gif.addEventListener(GIFPlayerEvent.FRAME_RENDERED, onGifFrameRendered);
             _gif.addEventListener(AsyncDecodeErrorEvent.ASYNC_DECODE_ERROR, onAsyncDecodeError);
-			//addChild(_gif);
 		}
 
         public function isGif():Boolean {
@@ -53,21 +56,21 @@ package org.hyzhak.imageuploader
 
 			_source = value;
 
-            /*
-            var bmp:Bitmap = new IN_PROGRESS_CLASS as Bitmap;
-            _gif.loadBytes(bmp.bitmapData.getPixels(bmp.bitmapData.rect));
-
-            */
-
             if (_source != null) {
                 var urlReq:URLRequest = new URLRequest(_source);
-                loader.load ( urlReq );
-                //_gif.load(urlReq);
+                _loader.load ( urlReq );
             } else {
-                //_gif.visible = false;
                 _gif.visible = false;
             }
 		}
+
+        private function onSecurityError(event:SecurityErrorEvent):void {
+            dispatchEvent(new Event(Event.COMPLETE));
+        }
+
+        private function onIOError(event:IOErrorEvent):void {
+            dispatchEvent(new Event(Event.COMPLETE));
+        }
 
         private function onComplete(event:Event):void {
             _gif.loadBytes(event.target.data);

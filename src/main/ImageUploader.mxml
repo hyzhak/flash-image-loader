@@ -1,12 +1,15 @@
 <?xml version="1.0"?>
 <s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
                xmlns:imageuploader="org.hyzhak.imageuploader.*"
-               addedToStage="onCreationComplete(event)">
+               creationComplete="onCreationComplete(event)"
+               addedToStage="onAddedToStage(event)">
     <fx:Script><![CDATA[
+        import mx.events.FlexEvent;
+
         import org.hyzhak.imageuploader.PostBytesCommand;
 
         [Bindable]
-        public var loading:Boolean = false;
+        public var loading:int = 0;
 
         [Bindable]
         public var imageUrl:String = "";
@@ -48,11 +51,15 @@
             new FileFilter("Images (*.png;*.jpg;*.gif)", "*.png;*.jpg;*.gif")
         ];
 
-        private function onCreationComplete(event:Event):void {
+        private function onCreationComplete(event:FlexEvent):void {
+            imageUrlImage.addEventListener("sourceChanged", onImageSourceChange);
+            imageUrlImage.addEventListener(FlexEvent.READY, onImageReady);
+        }
+
+        private function onAddedToStage(event:Event):void {
             Security.allowDomain("*");
             fetchFlashVars();
             updateUseGifForProgressImage();
-            //addEventListener("changeInProgressImageUrl", onChangeInProgressImageUrl);
             gifPlayerComponent.addEventListener(Event.COMPLETE, onGifCompleteUpdate);
             ExternalInterface.addCallback("fetch", fetch);
             ExternalInterface.addCallback("push", push);
@@ -69,15 +76,15 @@
         private function updateUseGifForProgressImage():void {
             useGifForProgressImage = gifPlayerComponent.isGif();
             /*
-            if (inProgressImageUrl == null || inProgressImageUrl.length <= 4 || inProgressImageUrl.toLowerCase().lastIndexOf(".gif") != inProgressImageUrl.length - 4) {
-                useGifForProgressImage = false;
-            } else {
-                useGifForProgressImage = true;
-                setTimeout(function ():void {
-                    trace("gifPlayerComponent.visible", gifPlayerComponent.visible);
-                }, 1000);
-            }
-            */
+             if (inProgressImageUrl == null || inProgressImageUrl.length <= 4 || inProgressImageUrl.toLowerCase().lastIndexOf(".gif") != inProgressImageUrl.length - 4) {
+             useGifForProgressImage = false;
+             } else {
+             useGifForProgressImage = true;
+             setTimeout(function ():void {
+             trace("gifPlayerComponent.visible", gifPlayerComponent.visible);
+             }, 1000);
+             }
+             */
         }
 
         private function fetch(url:String):void {
@@ -206,11 +213,11 @@
         }
 
         private function startProgressAnimation():void {
-            loading = true;
+            loading++;
         }
 
         private function stopProgressAnimation():void {
-            loading = false;
+            loading--;
         }
 
         private function push():void {
@@ -237,6 +244,14 @@
                 text: value.text
             });
         }
+
+        private function onImageSourceChange(event:Event):void {
+            startProgressAnimation();
+        }
+
+        private function onImageReady(event:Event):void {
+            stopProgressAnimation();
+        }
         ]]></fx:Script>
     <s:Group left="0" right="0" top="0" bottom="0">
         <s:Group visible="{loading}" horizontalCenter="0" verticalCenter="0">
@@ -247,9 +262,10 @@
             <s:Image visible="{!useGifForProgressImage}" source="{inProgressImageUrl}" left="0" right="0" top="0" bottom="0"/>
             <imageuploader:GIFPlayerComponent id="gifPlayerComponent" visible="{useGifForProgressImage}" source="{inProgressImageUrl}" horizontalCenter="0" verticalCenter="0"/>
         </s:Group>
+        <!--<s:Group left="0" right="0" top="0" bottom="0">-->
         <s:Group visible="{!loading}" left="0" right="0" top="0" bottom="0">
-            <s:Image visible="{imageData == null}" source="{imageUrl}" click="onClick(event)" left="0" right="0" top="0" bottom="0"></s:Image>
-            <s:Image visible="{imageData != null}" source="{imageData}" click="onClick(event)" left="0" right="0" top="0" bottom="0"></s:Image>
+            <s:Image id="imageUrlImage" visible="{imageData == null}" source="{imageUrl}" click="onClick(event)" left="0" right="0" top="0" bottom="0"/>
+            <s:Image visible="{imageData != null}" source="{imageData}" click="onClick(event)" left="0" right="0" top="0" bottom="0"/>
         </s:Group>
     </s:Group>
     <s:Button visible="{uploadButtonIsVisible}" label="upload" click="push()"></s:Button>
