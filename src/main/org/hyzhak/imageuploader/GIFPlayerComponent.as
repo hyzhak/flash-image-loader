@@ -1,6 +1,7 @@
 package org.hyzhak.imageuploader
 {
     import com.worlize.gif.GIFPlayer;
+    import com.worlize.gif.events.AsyncDecodeErrorEvent;
     import com.worlize.gif.events.GIFPlayerEvent;
 
     import flash.display.Bitmap;
@@ -32,8 +33,15 @@ package org.hyzhak.imageuploader
             loader.addEventListener(Event.COMPLETE, onComplete);
             _gif.addEventListener(GIFPlayerEvent.COMPLETE, onGifDecodeComplete);
             _gif.addEventListener(GIFPlayerEvent.FRAME_RENDERED, onGifFrameRendered);
+            _gif.addEventListener(AsyncDecodeErrorEvent.ASYNC_DECODE_ERROR, onAsyncDecodeError);
 			//addChild(_gif);
 		}
+
+        public function isGif():Boolean {
+            return _gif.totalFrames > 0;
+        }
+
+
 		public function get source():String{
 			return _source;
 		}
@@ -68,12 +76,17 @@ package org.hyzhak.imageuploader
         private function onGifDecodeComplete(event:GIFPlayerEvent):void {
             _gif.visible = true;
             _gif.play();
+            dispatchEvent(new Event(Event.COMPLETE));
         }
 
         private function onGifFrameRendered(event:GIFPlayerEvent):void {
             //Put in a middle
             _gif.x = -0.5 * _gif.width;
             _gif.y = -0.5 * _gif.height;
+        }
+
+        private function onAsyncDecodeError(event:AsyncDecodeErrorEvent):void {
+
         }
     }
 }

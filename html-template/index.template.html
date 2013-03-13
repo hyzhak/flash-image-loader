@@ -75,7 +75,7 @@
             var params = {};
             params.quality = "high";
             params.bgcolor = "${bgcolor}";
-            params.allowscriptaccess = "sameDomain";
+            params.allowscriptaccess = "always";
             params.allowfullscreen = "true";
 
             var attributes = {};
@@ -113,13 +113,13 @@
                 <param name="movie" value="${swf}.swf" />
                 <param name="quality" value="high" />
                 <param name="bgcolor" value="${bgcolor}" />
-                <param name="allowScriptAccess" value="sameDomain" />
+                <param name="allowScriptAccess" value="always" />
                 <param name="allowFullScreen" value="true" />
                 <!--[if !IE]>-->
                 <object type="application/x-shockwave-flash" data="${swf}.swf" width="${width}" height="${height}">
                     <param name="quality" value="high" />
                     <param name="bgcolor" value="${bgcolor}" />
-                    <param name="allowScriptAccess" value="sameDomain" />
+                    <param name="allowScriptAccess" value="always" />
                     <param name="allowFullScreen" value="true" />
                 <!--<![endif]-->
                 <!--[if gte IE 6]>-->
