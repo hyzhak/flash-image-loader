@@ -4,8 +4,6 @@ package org.hyzhak.imageuploader
     import com.worlize.gif.events.AsyncDecodeErrorEvent;
     import com.worlize.gif.events.GIFPlayerEvent;
 
-    import flash.display.Bitmap;
-
     import flash.events.Event;
     import flash.events.IOErrorEvent;
     import flash.events.SecurityErrorEvent;
@@ -19,7 +17,6 @@ package org.hyzhak.imageuploader
  
 	public class GIFPlayerComponent extends UIComponent
 	{
-		//private var _gif:GIFPlayer = new GIFPlayer();
         private var _gif:GIFPlayer = new GIFPlayer();
 		private var _source:String = new String();
         private var _loader:URLLoader = new URLLoader();
