@@ -40,11 +40,14 @@
             api.fetchCompleteHandler = function() {
                 console.log('fetchCompleteHandler', arguments);
             }
-            api.pushCompleteHandler = function() {
-                console.log('pushCompleteHandler', arguments);
+            api.postCompleteHandler = function() {
+                console.log('postCompleteHandler', arguments);
             }
             api.userUploadImageHandler = function() {
                 console.log('userUploadImageHandler', arguments);
+            }
+            api.tooBigFileHandler = function() {
+                console.log('tooBigFileHandler', arguments);
             }
         </script>
         <script type="text/javascript">
@@ -55,21 +58,24 @@
             var flashvars = {
                 id: '46',
 //                inProgressImageUrl: 'http://www.laboiteverte.fr/wp-content/uploads/2010/10/gif-psychedelique-hypnose-animation-11.gif',
-                inProgressImageUrl: 'http://beta.celebvideomessages.com/i/inprogress.gif',
-                defaultImageUrl: 'http://beta.celebvideomessages.com/i/inprogress.gif',
-                imageUrl: 'http://dl.realaxy.com/3q7tl3dnv0rp16h4l038p9fcov',
-                postUrl: 'http://beta.celebvideomessages.com/api/v1/profile/edit/',
-                postTemplate: '{id : {{id}}, userpic_data : {{userpic_data}} }',
+                inProgressImageUrl: 'http://www.celebvideomessages.com/i/inprogress.gif',
+                defaultImageUrl: 'http://www.celebvideomessages.com//i/nouserpic.png',
+                imageUrl: 'http://www.celebvideomessages.com/userpic/58.png',
+                postUrl: 'http://www.celebvideomessages.com/api/v1/profile/edit/',
+                postTemplate: '{"id" : "{{id}}", "userpic_data" : "data:image/{{extension}};base64,{{userpic_data}}" }',
                 uploadButtonIsVisible: true,
+                maxSize: 10000,
                 //
                 //fetch
                 fetchCompleteHandler: 'api.fetchCompleteHandler',
                 //push
-                pushCompleteHandler: 'api.pushCompleteHandler',
+                postCompleteHandler: 'api.postCompleteHandler',
                 //user upload image
                 userUploadImageHandler: 'api.userUploadImageHandler',
                 //errorHandler
-                errorHandler: 'api.errorHandler'
+                errorHandler: 'api.errorHandler',
+                //tooBigFileHandler
+                tooBigFileHandler: 'api.tooBigFileHandler'
             };
 
             var params = {};

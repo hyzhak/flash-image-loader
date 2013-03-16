@@ -4,6 +4,8 @@
                creationComplete="onCreationComplete(event)"
                addedToStage="onAddedToStage(event)">
     <fx:Script><![CDATA[
+        import flash.external.ExternalInterface;
+
         import mx.events.FlexEvent;
 
         import org.hyzhak.imageuploader.PostBytesCommand;
@@ -36,11 +38,15 @@
         //Handlers
         public var fetchCompleteHandler:String;
 
-        public var pushCompleteHandler:String;
+        public var postCompleteHandler:String;
 
         public var userUploadImageHandler:String;
 
+        public var tooBigFileHandler:String;
+
         public var errorHandler:String;
+
+        public var maxSize:int;
 
         private var _fileReference:FileReference;
 
@@ -61,8 +67,8 @@
             fetchFlashVars();
             updateUseGifForProgressImage();
             gifPlayerComponent.addEventListener(Event.COMPLETE, onGifCompleteUpdate);
-            ExternalInterface.addCallback("fetch", fetch);
-            ExternalInterface.addCallback("push", push);
+            ExternalInterface.addCallback("fetchImage", fetchImage);
+            ExternalInterface.addCallback("postImage", postImage);
         }
 
         private function onGifCompleteUpdate(event:Event):void {
@@ -87,7 +93,7 @@
              */
         }
 
-        private function fetch(url:String):void {
+        private function fetchImage(url:String):void {
             if (url == null || url == undefined) {
                 var tmpUrl:String = imageUrl;
                 imageUrl = "";
@@ -157,7 +163,15 @@
 
         private function onSelectFile(event:Event):void {
             startProgressAnimation();
-            _fileReference.load();
+            if (_fileReference.size > maxSize && maxSize > 0) {
+                ExternalInterface.call(tooBigFileHandler, {
+                    size: _fileReference.size
+                });
+                stopProgressAnimation();
+                stopListenFileReference();
+            } else {
+                _fileReference.load();
+            }
         }
 
         private function onProgress(event:ProgressEvent):void {
@@ -220,26 +234,31 @@
             loading--;
         }
 
-        private function push():void {
+        private function postImage():void {
             if (imageData == null) {
                 return;
             }
 
             startProgressAnimation();
-            PostBytesCommand.execute(postUrl, postTemplate, id, imageData.bitmapData.getPixels(imageData.bitmapData.rect))
+            var type:String = _fileReference.type;
+            if(type.length > 0) {
+                type = type.substr(1);
+            }
+
+            PostBytesCommand.execute(postUrl, postTemplate, id, _fileReference.data, type)
                     .then(onPushOk, onPushError);
         }
 
         private function onPushOk(value:*):void {
             stopProgressAnimation();
-            ExternalInterface.call(pushCompleteHandler, {
+            ExternalInterface.call(postCompleteHandler, {
                 error: 0
             });
         }
 
         private function onPushError(value:Object):void {
             stopProgressAnimation();
-            ExternalInterface.call(pushCompleteHandler, {
+            ExternalInterface.call(postCompleteHandler, {
                 error: value.errorID,
                 text: value.text
             });
@@ -264,9 +283,12 @@
         </s:Group>
         <!--<s:Group left="0" right="0" top="0" bottom="0">-->
         <s:Group visible="{!loading}" left="0" right="0" top="0" bottom="0">
-            <s:Image id="imageUrlImage" visible="{imageData == null}" source="{imageUrl}" click="onClick(event)" left="0" right="0" top="0" bottom="0"/>
+            <s:Group visible="{imageData == null}" left="0" right="0" top="0" bottom="0">
+                <s:Image visible="{imageUrl == null || imageUrl == ''}" source="{defaultImageUrl}" click="onClick(event)" left="0" right="0" top="0" bottom="0"/>
+                <s:Image id="imageUrlImage" visible="{!(imageUrl == null || imageUrl == '')}" source="{imageUrl}" click="onClick(event)" left="0" right="0" top="0" bottom="0"/>
+            </s:Group>
             <s:Image visible="{imageData != null}" source="{imageData}" click="onClick(event)" left="0" right="0" top="0" bottom="0"/>
         </s:Group>
     </s:Group>
-    <s:Button visible="{uploadButtonIsVisible}" label="upload" click="push()"></s:Button>
+    <s:Button visible="{uploadButtonIsVisible}" label="upload" click="postImage()"></s:Button>
 </s:Application>

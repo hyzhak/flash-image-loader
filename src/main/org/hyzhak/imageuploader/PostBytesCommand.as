@@ -8,6 +8,7 @@
 package org.hyzhak.imageuploader {
     import com.codecatalyst.promise.Deferred;
     import com.codecatalyst.promise.Promise;
+    import com.dynamicflash.util.Base64;
 
     import flash.display.Loader;
     import flash.events.Event;
@@ -30,9 +31,9 @@ package org.hyzhak.imageuploader {
 
         private static var _commands:Vector.<PostBytesCommand> = new Vector.<PostBytesCommand>();
 
-        public static function execute(url:String, template:String, id:String, data:ByteArray) : Promise {
+        public static function execute(url:String, template:String, id:String, data:ByteArray, extension:String) : Promise {
             var deferred:Deferred = new Deferred();
-            var command:PostBytesCommand = new PostBytesCommand(deferred, url, template, id, data);
+            var command:PostBytesCommand = new PostBytesCommand(deferred, url, template, id, data, extension);
             addCommand(command);
 
             return deferred.promise.then(function (value:*):* {
@@ -59,28 +60,37 @@ package org.hyzhak.imageuploader {
 
         private const ID_MARK:String = "{{id}}";
         private const ID_DATA:String = "{{userpic_data}}";
+        private const ID_EXTENSION:String = "{{extension}}";
 
         private var _deferred:Deferred;
         private var _encoder:Base64Encoder = new Base64Encoder();
 
-        public function PostBytesCommand(deferred:Deferred, url:String, template:String, id:String, data:ByteArray) {
+        public function PostBytesCommand(deferred:Deferred, url:String, template:String, id:String, data:ByteArray, extension:String) {
             _deferred = deferred;
 
             _encoder.reset();
             _encoder.encodeBytes(data);
 
-            template = template.replace(ID_MARK, id);
-            template = template.replace(ID_DATA, _encoder.toString());
+            var bytes:ByteArray = new ByteArray();
+            var base64:String = Base64.encodeByteArray(data);
+            template = template.replace('&quot;', '"')
+                                .replace(ID_MARK, id)
+                                .replace(ID_EXTENSION, extension)
+                                .replace(ID_DATA, base64);
 
+            bytes.writeUTFBytes(template);
+            bytes.position = 0;
+            template = bytes.readUTFBytes(bytes.length);
             try {
 
                 var request:URLRequest = new URLRequest();
                 request.url = url;
+                request.data = bytes;
+                request.contentType = "application/octet-stream";
                 request.method = URLRequestMethod.POST;
-                request.data = template;
 
                 var loader:URLLoader = new URLLoader();
-                loader.dataFormat = URLLoaderDataFormat.TEXT;
+                loader.dataFormat = URLLoaderDataFormat.BINARY;
                 loader.addEventListener(Event.COMPLETE, onCompleteHandler);
                 loader.addEventListener(Event.OPEN, onOpenHandler);
                 loader.addEventListener(ProgressEvent.PROGRESS, onProgressHandler);
