@@ -40,6 +40,8 @@
 
         public var postCompleteHandler:String;
 
+        public var fileSelectHandler:String;
+
         public var userUploadImageHandler:String;
 
         public var tooBigFileHandler:String;
@@ -163,6 +165,15 @@
 
         private function onSelectFile(event:Event):void {
             startProgressAnimation();
+            ExternalInterface.call(fileSelectHandler, {
+                creationDate: _fileReference.creationDate,
+                creator: _fileReference.creator,
+                modificationDate: _fileReference.modificationDate,
+                size: _fileReference.size,
+                type: _fileReference.type,
+                name: _fileReference.name
+            });
+
             if (_fileReference.size > maxSize && maxSize > 0) {
                 ExternalInterface.call(tooBigFileHandler, {
                     size: _fileReference.size
